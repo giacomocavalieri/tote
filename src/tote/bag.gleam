@@ -1,3 +1,63 @@
+////
+//// This package offers a bunch of functions you can use to work with bags.
+//// To quickly browse the documentation you can use this cheatsheet:
+//// 
+//// <table>
+//// <tbody>
+////   <tr>
+////     <td>Creating bags</td>
+////     <td>
+////      <a href="#new">new</a>,
+////      <a href="#from_list">from_list</a>,
+////      <a href="#from_map">from_map</a>
+////     </td>
+////   </tr>
+////   <tr>
+////     <td>Adding or removing items</td>
+////     <td>
+////      <a href="#insert">insert</a>,
+////      <a href="#remove">remove</a>,
+////      <a href="#remove_all">remove_all</a>,
+////      <a href="#update">update</a>
+////     </td>
+////   </tr>
+////   <tr>
+////     <td>Querying the content of a bag</td>
+////     <td>
+////      <a href="#copies">copies</a>,
+////      <a href="#contains">contains</a>,
+////      <a href="#is_empty">is_empty</a>,
+////      <a href="#size">size</a> 
+////     </td>
+////   </tr>
+////   <tr>
+////     <td>Combining bags</td>
+////     <td>
+////      <a href="#intersect">intersect</a>,
+////      <a href="#merge">merge</a>,
+////      <a href="#subtract">subtract</a>
+////     </td>
+////   </tr>
+////   <tr>
+////     <td>Transforming the content of a bag</td>
+////     <td>
+////      <a href="#fold">fold</a>,
+////      <a href="#map">map</a>,
+////      <a href="#filter">filter</a>
+////     </td>
+////   </tr>
+////   <tr>
+////     <td>Converting a bag into other data structures</td>
+////     <td>
+////      <a href="#to_list">to_list</a>,
+////      <a href="#to_set">to_set</a>,
+////      <a href="#to_map">to_map</a>
+////     </td>
+////   </tr>
+//// </tbody>
+//// </table>
+//// 
+
 import gleam/int
 import gleam/list
 import gleam/map.{Map}
@@ -121,7 +181,7 @@ pub fn remove_all(from bag: Bag(a), copies_of item: a) -> Bag(a) {
 
 /// Updates the number of copies of an item in the bag.
 /// 
-/// If the function returns 0, or a negative number, the item is removed from
+/// If the function returns 0 or a negative number, the item is removed from
 /// the bag.
 /// 
 /// ## Examples
@@ -302,7 +362,9 @@ pub fn subtract(from one: Bag(a), items_of other: Bag(a)) -> Bag(a) {
 /// 
 /// ```gleam
 /// let bag = bag.from_list(["a", "b", "b"])
-/// bag.fold(over: bag, from: 0, with: fn(count, _, copies) { count + copies })
+/// bag.fold(over: bag, from: 0, with: fn(count, _, copies) {
+///   count + copies
+/// })
 /// // -> 3
 /// ```
 pub fn fold(
