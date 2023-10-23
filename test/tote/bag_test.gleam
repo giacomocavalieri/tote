@@ -129,6 +129,92 @@ pub fn bag_is_empty_when_size_is_zero_test() {
   |> should.equal(bag.size(bag) == 0)
 }
 
+// PROPERTIES OF COMBINING FUNCTIONS -------------------------------------------
+
+pub fn intersection_with_empty_bag_is_always_empty_test() {
+  use bag <- fuzz(bag())
+  bag.intersect(bag, with: bag.new())
+  |> should.equal(bag.new())
+}
+
+pub fn intersection_is_commutative_test() {
+  use #(bag1, bag2) <- fuzz(random.map2(bag(), bag(), pair.new))
+  bag.intersect(bag1, bag2)
+  |> should.equal(bag.intersect(bag2, bag1))
+}
+
+pub fn intersection_is_associative_test() {
+  use #(bag1, bag2, bag3) <- fuzz(triple(bag(), bag(), bag()))
+  bag.intersect(bag.intersect(bag1, bag2), bag3)
+  |> should.equal(bag.intersect(bag1, bag.intersect(bag2, bag3)))
+}
+
+pub fn intersection_always_selects_the_minimum_number_of_copies_test() {
+  use #(bag1, bag2) <- fuzz(random.map2(bag(), bag(), pair.new))
+  let intersection = bag.intersect(bag1, with: bag2)
+
+  use #(item, copies_in_intersection) <- list.each(bag.to_list(intersection))
+  let copies_in_one = bag.copies(of: item, in: bag1)
+  let copies_in_other = bag.copies(of: item, in: bag2)
+
+  copies_in_intersection
+  |> should.equal(int.min(copies_in_one, copies_in_other))
+}
+
+pub fn merge_with_empty_bag_is_the_original_bag_test() {
+  use bag <- fuzz(bag())
+  bag.merge(bag, with: bag.new())
+  |> should.equal(bag)
+}
+
+pub fn merge_is_commutative_test() {
+  use #(bag1, bag2) <- fuzz(random.map2(bag(), bag(), pair.new))
+  bag.merge(bag1, bag2)
+  |> should.equal(bag.merge(bag2, bag1))
+}
+
+pub fn merge_is_associative_test() {
+  use #(bag1, bag2, bag3) <- fuzz(triple(bag(), bag(), bag()))
+  bag.merge(bag.merge(bag1, bag2), bag3)
+  |> should.equal(bag.merge(bag1, bag.merge(bag2, bag3)))
+}
+
+pub fn merge_sums_the_occurrences_test() {
+  use #(bag1, bag2) <- fuzz(random.map2(bag(), bag(), pair.new))
+  let union = bag.merge(bag1, bag2)
+
+  use #(item, copies_in_union) <- list.each(bag.to_list(union))
+  let copies_in_one = bag.copies(of: item, in: bag1)
+  let copies_in_other = bag.copies(of: item, in: bag2)
+
+  copies_in_union
+  |> should.equal(copies_in_one + copies_in_other)
+}
+
+pub fn empty_minus_anything_is_still_empty_test() {
+  use bag <- fuzz(bag())
+  bag.subtract(bag.new(), bag)
+  |> should.equal(bag.new())
+}
+
+pub fn anything_minus_empty_is_still_empty_test() {
+  use bag <- fuzz(bag())
+  bag.subtract(bag, bag.new())
+  |> should.equal(bag)
+}
+
+pub fn subtraction_removes_the_appropriate_number_of_occurrences_test() {
+  use #(bag1, bag2) <- fuzz(random.map2(bag(), bag(), pair.new))
+  let difference = bag.subtract(from: bag1, items_of: bag2)
+
+  use #(item, copies_in_difference) <- list.each(bag.to_list(difference))
+  let copies_in_one = bag.copies(of: item, in: bag1)
+  let copies_in_other = bag.copies(of: item, in: bag2)
+
+  copies_in_difference
+  |> should.equal(int.max(0, copies_in_one - copies_in_other))
+}
+
 // PROPERTIES OF TRANSFORMATION FUNCTIONS --------------------------------------
 
 pub fn elements_mapped_to_the_same_thing_get_summed_together_test() {
@@ -186,9 +272,13 @@ pub fn to_map_same_as_to_list_and_then_list_to_map_test() {
 
 // FUZZYING HELPERS ------------------------------------------------------------
 
+const iterations = 100
+
+const max_list_size = 100
+
 fn fuzz(for_each generator: Generator(a), check assertion: fn(a) -> Nil) -> Nil {
   random.to_iterator(generator, seed.new(11))
-  |> iterator.take(100)
+  |> iterator.take(iterations)
   |> iterator.each(assertion)
 }
 
@@ -197,7 +287,7 @@ fn letter() -> Generator(String) {
 }
 
 fn letters() -> Generator(List(String)) {
-  use size <- random.then(random.int(0, 100))
+  use size <- random.then(random.int(0, max_list_size))
   random.list(from: letter(), of: size)
 }
 
@@ -216,7 +306,7 @@ fn bag_letter_and_copies() -> Generator(#(Bag(String), String, Int)) {
 fn letters_map() -> Generator(Map(String, Int)) {
   let letter_with_copies = random.map2(letter(), positive_int(), pair.new)
 
-  random.int(0, 100)
+  random.int(0, max_list_size)
   |> random.then(fn(size) { random.list(letter_with_copies, of: size) })
   |> random.map(map.from_list)
 }
