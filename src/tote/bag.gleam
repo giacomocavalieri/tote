@@ -108,7 +108,7 @@ pub fn from_list(list: List(a)) -> Bag(a) {
 }
 
 /// Creates a new bag from the map where each key/value pair is turned into
-/// an item with those many copies.
+/// an item with those many copies inside the bag.
 /// 
 /// ## Examples
 /// 
@@ -127,8 +127,8 @@ pub fn from_map(map: Map(a, Int)) -> Bag(a) {
 
 /// Adds `n` copies of the given item into a bag.
 /// 
-/// If the number of copies to add is negative, then this acts as a call to
-/// `remove` and will remove that many copies from the bag.
+/// If the number of copies to add is negative, then this is the same as calling
+/// [`remove`](#remove) and will remove that many copies from the bag.
 /// 
 /// ## Examples
 /// 
@@ -156,8 +156,8 @@ pub fn insert(into bag: Bag(a), copies to_add: Int, of item: a) -> Bag(a) {
 /// If the quantity to remove is greater than the number of copies in the bag,
 /// all copies of that item are removed.
 /// 
-/// Giving a negative quantity to remove doesn't really make sense, so the sign
-/// of `copies` is ignored.
+/// > ⚠️ Giving a negative quantity to remove doesn't really make sense, so the
+/// > sign of the `copies` argument is always ignored.
 /// 
 /// ## Examples
 /// 
@@ -274,7 +274,8 @@ pub fn contains(bag: Bag(a), item: a) -> Bool {
 
 /// Returns `True` if the bag is empty.
 /// 
-/// This is more efficient than checking if the bag's size is 0!
+/// > ⚠️ This is more efficient than checking if the bag's size is 0.
+/// > You should always use this function to check that a bag is empty!
 /// 
 /// ## Examples
 /// 
@@ -298,8 +299,8 @@ pub fn is_empty(bag: Bag(a)) -> Bool {
 /// > bag.
 /// > 
 /// > If you need to check that a bag is empty, you should always use the
-/// > `is_empty` function instead of checking if the size is 0. It's going
-/// > to be way more efficient!
+/// > [`is_empty`](#is_empty) function instead of checking if the size is 0.
+/// > It's going to be way more efficient!
 /// 
 /// ## Examples
 /// 
@@ -370,11 +371,11 @@ pub fn subtract(from one: Bag(a), items_of other: Bag(a)) -> Bag(a) {
 
 // TRANSFORMING BAGS -----------------------------------------------------------
 
-/// Combines all items of a baf into a single value by calling a given function
+/// Combines all items of a bag into a single value by calling a given function
 /// on each one.
 /// 
-/// The function will receive as input the item, the number of its copies and
-/// the accumulator.
+/// The function will receive as input the accumulator, the item and
+/// its number of copies.
 /// 
 /// ## Examples
 /// 
