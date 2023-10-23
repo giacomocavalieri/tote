@@ -421,7 +421,7 @@ pub fn map(bag: Bag(a), with fun: fn(a, Int) -> b) -> Bag(b) {
 /// 
 /// ```gleam
 /// bag.from_list(["a", "b", "a", "b", "c", "d"])
-/// |> bag.filter(keep_if: fn(_, copies) { copies <= 1 })
+/// |> bag.filter(keeping: fn(_, copies) { copies <= 1 })
 /// |> bag.to_list
 /// // -> [#("c", 1), #("d", 1)]
 /// ```
