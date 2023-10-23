@@ -130,7 +130,12 @@ pub fn from_map(map: Map(a, Int)) -> Bag(a) {
 /// ```
 /// 
 pub fn insert(into bag: Bag(a), copies to_add: Int, of item: a) -> Bag(a) {
-  Bag(map.update(bag.map, item, fn(n) { option.unwrap(n, or: 0) + to_add }))
+  case int.compare(to_add, 0) {
+    Lt -> remove(from: bag, copies: to_add, of: item)
+    Eq -> bag
+    Gt ->
+      Bag(map.update(bag.map, item, fn(n) { option.unwrap(n, or: 0) + to_add }))
+  }
 }
 
 /// Removes `n` copies of the given item from a bag.
