@@ -9,6 +9,19 @@
 
 ## What's a bag?
 
+A `Bag` is a data structure similar to a set with the difference that it
+can store multiple copies of the same item.
+
+This means that you can efficiently check if an element is inside a bag with
+the [contains](https://hexdocs.pm/tote/tote/bag.html#contains) function,
+just like a set.
+At the same time, you can ask how many copies of an item are contained inside a
+bag using the [copies](https://hexdocs.pm/tote/tote/bag.html#copies) function.
+
+> If you are curious about implementation details, a `Bag(a)` is nothing
+> more than a handy wrapper around a `Map(a, Int)` that is used to keep
+> track of the number of occurrences of each item.
+
 ## Installation
 
 To add this package to your Gleam project:

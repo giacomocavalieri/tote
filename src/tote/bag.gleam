@@ -1,5 +1,8 @@
 ////
-//// This package offers a bunch of functions you can use to work with bags.
+//// This module has all the functions you may need to work with bags (if you
+//// feel something is missing, please
+//// [open an issue](https://github.com/giacomocavalieri/tote/issues))!
+//// 
 //// To quickly browse the documentation you can use this cheatsheet:
 //// 
 //// <table>
@@ -65,7 +68,17 @@ import gleam/option
 import gleam/order.{Eq, Gt, Lt}
 import gleam/set.{Set}
 
-/// A `Bag` is a TODO.
+/// A `Bag` is a data structure similar to a set with the difference that it
+/// can store multiple copies of the same item.
+/// 
+/// This means that you can efficiently check if an element is inside a bag with
+/// the [contains](#contains) function, just like a set. At the same time, you
+/// can ask how many copies of an item are contained inside a bag using the
+/// [copies](#copies) function.
+/// 
+/// > If you are curious about implementation details, a `Bag(a)` is nothing
+/// > more than a handy wrapper around a `Map(a, Int)` that is used to keep
+/// > track of the number of occurrences of each item. 
 /// 
 pub opaque type Bag(a) {
   Bag(map: Map(a, Int))
