@@ -325,11 +325,11 @@ pub fn intersect(one: Bag(a), with other: Bag(a)) -> Bag(a) {
 /// ```gleam
 /// let bag1 = bag.from_list(["a", "b"])
 /// let bag2 = bag.from_list(["b", "c"])
-/// bag.union(bag1, bag2) |> bag.to_list
+/// bag.merge(bag1, bag2) |> bag.to_list
 /// // -> [#("a", 1), #("b", 2), #("c", 1)]
 /// ```
 /// 
-pub fn union(one: Bag(a), with other: Bag(a)) -> Bag(a) {
+pub fn merge(one: Bag(a), with other: Bag(a)) -> Bag(a) {
   use acc, item, copies_in_one <- fold(over: one, from: other)
   insert(into: acc, copies: copies_in_one, of: item)
 }
