@@ -395,14 +395,6 @@ pub fn map(bag: Bag(a), with fun: fn(a, Int) -> b) -> Bag(b) {
   insert(into: acc, copies: copies, of: fun(item, copies))
 }
 
-/// This works exactly like `map` but is a shortcut for when the mapping
-/// function doesn't need to know the number of occurrences of each item it's
-/// mapping over.
-///
-pub fn map_values(bag: Bag(a), with fun: fn(a) -> b) -> Bag(b) {
-  map(bag, with: fn(a, _) { fun(a) })
-}
-
 /// Only keeps the items of a bag the respect a given predicate that takes as
 /// input an item and the number of its copies.
 /// 
@@ -421,14 +413,6 @@ pub fn filter(bag: Bag(a), keeping predicate: fn(a, Int) -> Bool) -> Bag(a) {
     True -> insert(into: acc, copies: copies, of: item)
     False -> acc
   }
-}
-
-/// This works exactly like `filter` but is a shortcut for when the predicate
-/// function doesn't need to know the number of occurrences of each item it's
-/// filtering over.
-///
-pub fn filter_values(bag: Bag(a), keep_if predicate: fn(a) -> Bool) -> Bag(a) {
-  filter(bag, keeping: fn(a, _) { predicate(a) })
 }
 
 // BAG CONVERSIONS -------------------------------------------------------------
