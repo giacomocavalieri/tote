@@ -4,9 +4,10 @@ version = "1.0.0"
 description = "Bags (or multisets) in Gleam"
 licences = ["Apache-2.0"]
 repository = { type = "github", user = "giacomocavalieri", repo = "tote" }
+gleam = ">= 0.32.0"
 
 [dependencies]
-gleam_stdlib = "~> 0.31"
+gleam_stdlib = "~> 0.32"
 
 [dev-dependencies]
 gleeunit = "~> 0.10"

@@ -63,10 +63,10 @@
 
 import gleam/int
 import gleam/list
-import gleam/map.{Map}
+import gleam/map.{type Map}
 import gleam/option
 import gleam/order.{Eq, Gt, Lt}
-import gleam/set.{Set}
+import gleam/set.{type Set}
 
 /// A `Bag` is a data structure similar to a set with the difference that it
 /// can store multiple copies of the same item.

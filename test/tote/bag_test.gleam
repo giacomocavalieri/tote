@@ -1,13 +1,13 @@
 import gleam/int
 import gleam/iterator
 import gleam/list
-import gleam/map.{Map}
+import gleam/map.{type Map}
 import gleam/pair
 import gleam/set
 import gleeunit/should
-import prng/random.{Generator}
+import prng/random.{type Generator}
 import prng/seed
-import tote/bag.{Bag}
+import tote/bag.{type Bag}
 
 // UNIT TESTS ------------------------------------------------------------------
 
