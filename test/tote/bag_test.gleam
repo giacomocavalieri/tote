@@ -1,7 +1,7 @@
 import gleam/int
 import gleam/iterator
 import gleam/list
-import gleam/map.{type Map}
+import gleam/dict.{type Dict}
 import gleam/pair
 import gleam/set
 import gleeunit/should
@@ -256,7 +256,7 @@ pub fn to_set_same_as_taking_the_distinct_items_test() {
 
   let distinct_items =
     bag.to_map(bag)
-    |> map.keys
+    |> dict.keys
     |> set.from_list
 
   bag.to_set(bag)
@@ -266,7 +266,7 @@ pub fn to_set_same_as_taking_the_distinct_items_test() {
 pub fn to_map_same_as_to_list_and_then_list_to_map_test() {
   use bag <- fuzz(bag())
   bag.to_list(bag)
-  |> map.from_list
+  |> dict.from_list
   |> should.equal(bag.to_map(bag))
 }
 
@@ -288,7 +288,7 @@ fn letter() -> Generator(String) {
 
 fn letters() -> Generator(List(String)) {
   use size <- random.then(random.int(0, max_list_size))
-  random.list(from: letter(), of: size)
+  random.fixed_size_list(from: letter(), of: size)
 }
 
 fn bag() -> Generator(Bag(String)) {
@@ -303,12 +303,14 @@ fn bag_letter_and_copies() -> Generator(#(Bag(String), String, Int)) {
   triple(bag(), letter(), positive_int())
 }
 
-fn letters_map() -> Generator(Map(String, Int)) {
+fn letters_map() -> Generator(Dict(String, Int)) {
   let letter_with_copies = random.map2(letter(), positive_int(), pair.new)
 
   random.int(0, max_list_size)
-  |> random.then(fn(size) { random.list(letter_with_copies, of: size) })
-  |> random.map(map.from_list)
+  |> random.then(fn(size) {
+    random.fixed_size_list(letter_with_copies, of: size)
+  })
+  |> random.map(dict.from_list)
 }
 
 fn positive_int() -> Generator(Int) {
