@@ -61,10 +61,10 @@
 //// </table>
 ////
 
+import gleam/dict.{type Dict}
 import gleam/int
 import gleam/list
-import gleam/dict.{type Dict}
-import gleam/option
+import gleam/option.{None, Some}
 import gleam/order.{Eq, Gt, Lt}
 import gleam/set.{type Set}
 
@@ -99,7 +99,7 @@ pub fn new() -> Bag(a) {
 /// ```gleam
 /// bag.from_list(["a", "b", "a", "c"])
 /// |> bag.to_list
-/// // -> [#("a", 2), #("b", 1), #("c", 1)]
+/// // [#("a", 2), #("b", 1), #("c", 1)]
 /// ```
 ///
 pub fn from_list(list: List(a)) -> Bag(a) {
@@ -133,13 +133,17 @@ pub fn from_map(map: Dict(a, Int)) -> Bag(a) {
 /// ## Examples
 ///
 /// ```gleam
-/// bag.new() |> bag.insert(2, "a") |> bag.copies(of: "a")
-/// // -> 2
+/// bag.new()
+/// |> bag.insert(2, "a")
+/// |> bag.copies(of: "a")
+/// // 2
 /// ```
 ///
 /// ```gleam
-/// bag.from_list(["a"]) |> bag.insert(-1, "a") |> bag.copies(of: "a")
-/// // -> 0
+/// bag.from_list(["a"])
+/// |> bag.insert(-1, "a")
+/// |> bag.copies(of: "a")
+/// // 0
 /// ```
 ///
 pub fn insert(into bag: Bag(a), copies to_add: Int, of item: a) -> Bag(a) {
@@ -148,7 +152,12 @@ pub fn insert(into bag: Bag(a), copies to_add: Int, of item: a) -> Bag(a) {
     Eq -> bag
     Gt ->
       Bag(
-        dict.update(bag.map, item, fn(n) { option.unwrap(n, or: 0) + to_add }),
+        dict.upsert(bag.map, item, fn(n) {
+          case n {
+            Some(n) -> n + to_add
+            None -> to_add
+          }
+        }),
       )
   }
 }
@@ -164,18 +173,24 @@ pub fn insert(into bag: Bag(a), copies to_add: Int, of item: a) -> Bag(a) {
 /// ## Examples
 ///
 /// ```gleam
-/// bag.from_list(["a", "a"]) |> bag.remove(1, "a") |> bag.copies(of: "a")
-/// // -> 1
+/// bag.from_list(["a", "a"])
+/// |> bag.remove(1, "a")
+/// |> bag.copies(of: "a")
+/// // 1
 /// ```
 ///
 /// ```gleam
-/// bag.from_list(["a", "a"]) |> bag.remove(-1, "a") |> bag.copies(of: "a")
-/// // -> 1
+/// bag.from_list(["a", "a"])
+/// |> bag.remove(-1, "a")
+/// |> bag.copies(of: "a")
+/// // 1
 /// ```
 ///
 /// ```gleam
-/// bag.from_list(["a", "a"]) |> bag.remove(10, "a") |> bag.copies(of: "a")
-/// // -> 0
+/// bag.from_list(["a", "a"])
+/// |> bag.remove(10, "a")
+/// |> bag.copies(of: "a")
+/// // 0
 /// ```
 ///
 pub fn remove(from bag: Bag(a), copies to_remove: Int, of item: a) -> Bag(a) {
@@ -192,8 +207,10 @@ pub fn remove(from bag: Bag(a), copies to_remove: Int, of item: a) -> Bag(a) {
 /// ## Examples
 ///
 /// ```gleam
-/// bag.from_list(["a", "b", "a"]) |> bag.remove_all("a") |> bag.to_list
-/// // -> [#(b, 1)]
+/// bag.from_list(["a", "b", "a"])
+/// |> bag.remove_all("a")
+/// |> bag.to_list
+/// // [#(b, 1)]
 /// ```
 pub fn remove_all(from bag: Bag(a), copies_of item: a) -> Bag(a) {
   Bag(dict.delete(bag.map, item))
@@ -210,21 +227,21 @@ pub fn remove_all(from bag: Bag(a), copies_of item: a) -> Bag(a) {
 /// bag.from_list(["a"])
 /// |> bag.update("a", fn(n) { n + 1 })
 /// |> bag.copies(of: "a")
-/// // -> 2
+/// // 2
 /// ```
 ///
 /// ```gleam
 /// bag.new()
 /// |> bag.update("a", fn(_) { 10 })
 /// |> bag.copies(of: "a")
-/// // -> 10
+/// // 10
 /// ```
 ///
 /// ```gleam
 /// bag.from_list(["a"])
 /// |> bag.update("a", fn(_) { -1 })
 /// |> bag.copies(of: "a")
-/// // -> 0
+/// // 0
 /// ```
 ///
 pub fn update(in bag: Bag(a), item item: a, with fun: fn(Int) -> Int) -> Bag(a) {
@@ -245,8 +262,9 @@ pub fn update(in bag: Bag(a), item item: a, with fun: fn(Int) -> Int) -> Bag(a) 
 /// ## Examples
 ///
 /// ```gleam
-/// bag.from_list(["a", "b", "a", "c"]) |> bag.copies(of: "a")
-/// // -> 2
+/// bag.from_list(["a", "b", "a", "c"])
+/// |> bag.copies(of: "a")
+/// // 2
 /// ```
 ///
 pub fn copies(in bag: Bag(a), of item: a) -> Int {
@@ -261,13 +279,15 @@ pub fn copies(in bag: Bag(a), of item: a) -> Int {
 /// ## Examples
 ///
 /// ```gleam
-/// bag.from_list(["a", "b"]) |> bag.contains("a")
-/// // -> True
+/// bag.from_list(["a", "b"])
+/// |> bag.contains("a")
+/// // True
 /// ```
 ///
 /// ```gleam
-/// bag.from_list(["a", "b"]) |> bag.contains("c")
-/// // -> False
+/// bag.from_list(["a", "b"])
+/// |> bag.contains("c")
+/// // False
 /// ```
 ///
 pub fn contains(bag: Bag(a), item: a) -> Bool {
@@ -282,13 +302,15 @@ pub fn contains(bag: Bag(a), item: a) -> Bool {
 /// ## Examples
 ///
 /// ```gleam
-/// bag.new() |> bag.is_empty()
-/// // -> True
+/// bag.new()
+/// |> bag.is_empty()
+/// // True
 /// ```
 ///
 /// ```gleam
-/// bag.from_list(["a", "b"]) |> bag.is_empty()
-/// // -> False
+/// bag.from_list(["a", "b"])
+/// |> bag.is_empty()
+/// // False
 /// ```
 ///
 pub fn is_empty(bag: Bag(a)) -> Bool {
@@ -307,8 +329,9 @@ pub fn is_empty(bag: Bag(a)) -> Bool {
 /// ## Examples
 ///
 /// ```gleam
-/// bag.from_list(["a", "b", "a", "c"]) |> bag.size
-/// // -> 4
+/// bag.from_list(["a", "b", "a", "c"])
+/// |> bag.size
+/// // 4
 /// ```
 ///
 pub fn size(bag: Bag(a)) -> Int {
@@ -326,8 +349,10 @@ pub fn size(bag: Bag(a)) -> Int {
 /// ```gleam
 /// let bag1 = bag.from_list(["a", "a", "b", "c"])
 /// let bag2 = bag.from_list(["a", "c", "c"])
-/// bag.intersect(bag1, bag2) |> bag.to_list
-/// // -> [#("a", 1), #("c", 1)]
+///
+/// bag.intersect(bag1, bag2)
+/// |> bag.to_list
+/// // [#("a", 1), #("c", 1)]
 /// ```
 ///
 pub fn intersect(one: Bag(a), with other: Bag(a)) -> Bag(a) {
@@ -346,8 +371,10 @@ pub fn intersect(one: Bag(a), with other: Bag(a)) -> Bag(a) {
 /// ```gleam
 /// let bag1 = bag.from_list(["a", "b"])
 /// let bag2 = bag.from_list(["b", "c"])
-/// bag.merge(bag1, bag2) |> bag.to_list
-/// // -> [#("a", 1), #("b", 2), #("c", 1)]
+///
+/// bag.merge(bag1, bag2)
+/// |> bag.to_list
+/// // [#("a", 1), #("b", 2), #("c", 1)]
 /// ```
 ///
 pub fn merge(one: Bag(a), with other: Bag(a)) -> Bag(a) {
@@ -362,8 +389,10 @@ pub fn merge(one: Bag(a), with other: Bag(a)) -> Bag(a) {
 /// ```gleam
 /// let bag1 = bag.from_list(["a", "b", "b"])
 /// let bag2 = bag.from_list(["b", "c"])
-/// bag.subtract(from: one, items_of: other) |> bag.to_list
-/// // -> [#("a", 1), #("b", 1)]
+///
+/// bag.subtract(from: one, items_of: other)
+/// |> bag.to_list
+/// // [#("a", 1), #("b", 1)]
 /// ```
 ///
 pub fn subtract(from one: Bag(a), items_of other: Bag(a)) -> Bag(a) {
@@ -386,7 +415,7 @@ pub fn subtract(from one: Bag(a), items_of other: Bag(a)) -> Bag(a) {
 /// bag.fold(over: bag, from: 0, with: fn(count, _, copies) {
 ///   count + copies
 /// })
-/// // -> 3
+/// // 3
 /// ```
 pub fn fold(
   over bag: Bag(a),
@@ -408,7 +437,7 @@ pub fn fold(
 /// bag.from_list(["a", "b", "b"])
 /// |> bag.map(fn(item, _) { "c" })
 /// |> bag.to_list
-/// // -> [#("c", 3)]
+/// // [#("c", 3)]
 /// ```
 ///
 pub fn map(bag: Bag(a), with fun: fn(a, Int) -> b) -> Bag(b) {
@@ -425,7 +454,7 @@ pub fn map(bag: Bag(a), with fun: fn(a, Int) -> b) -> Bag(b) {
 /// bag.from_list(["a", "b", "a", "b", "c", "d"])
 /// |> bag.filter(keeping: fn(_, copies) { copies <= 1 })
 /// |> bag.to_list
-/// // -> [#("c", 1), #("d", 1)]
+/// // [#("c", 1), #("d", 1)]
 /// ```
 ///
 pub fn filter(bag: Bag(a), keeping predicate: fn(a, Int) -> Bool) -> Bag(a) {
@@ -446,7 +475,7 @@ pub fn filter(bag: Bag(a), keeping predicate: fn(a, Int) -> Bool) -> Bag(a) {
 /// ```gleam
 /// bag.from_list(["a", "b", "a", "c"])
 /// |> bag.to_list
-/// // -> [#("a", 2), #("b", 1), #("c", 1)]
+/// // [#("a", 2), #("b", 1), #("c", 1)]
 /// ```
 ///
 pub fn to_list(bag: Bag(a)) -> List(#(a, Int)) {
@@ -461,7 +490,7 @@ pub fn to_list(bag: Bag(a)) -> List(#(a, Int)) {
 /// ```gleam
 /// bag.from_list(["a", "b", "a", "c"])
 /// |> bag.to_set
-/// // -> set.from_list(["a", "b", "c"])
+/// // set.from_list(["a", "b", "c"])
 /// ```
 ///
 pub fn to_set(bag: Bag(a)) -> Set(a) {
