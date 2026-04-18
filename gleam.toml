@@ -1,5 +1,5 @@
 name = "tote"
-version = "1.0.2"
+version = "1.1.0"
 
 description = "Bags (or multisets) in Gleam"
 licences = ["Apache-2.0"]
