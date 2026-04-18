@@ -1,12 +1,9 @@
-import gleam/int
-import gleam/iterator
-import gleam/list
 import gleam/dict.{type Dict}
-import gleam/pair
+import gleam/int
+import gleam/list
 import gleam/set
 import gleeunit/should
 import prng/random.{type Generator}
-import prng/seed
 import tote/bag.{type Bag}
 
 // UNIT TESTS ------------------------------------------------------------------
@@ -138,7 +135,11 @@ pub fn intersection_with_empty_bag_is_always_empty_test() {
 }
 
 pub fn intersection_is_commutative_test() {
-  use #(bag1, bag2) <- fuzz(random.map2(bag(), bag(), pair.new))
+  use #(bag1, bag2) <- fuzz({
+    use bag1 <- random.then(bag())
+    use bag2 <- random.then(bag())
+    random.constant(#(bag1, bag2))
+  })
   bag.intersect(bag1, bag2)
   |> should.equal(bag.intersect(bag2, bag1))
 }
@@ -150,7 +151,11 @@ pub fn intersection_is_associative_test() {
 }
 
 pub fn intersection_always_selects_the_minimum_number_of_copies_test() {
-  use #(bag1, bag2) <- fuzz(random.map2(bag(), bag(), pair.new))
+  use #(bag1, bag2) <- fuzz({
+    use bag1 <- random.then(bag())
+    use bag2 <- random.then(bag())
+    random.constant(#(bag1, bag2))
+  })
   let intersection = bag.intersect(bag1, with: bag2)
 
   use #(item, copies_in_intersection) <- list.each(bag.to_list(intersection))
@@ -168,7 +173,11 @@ pub fn merge_with_empty_bag_is_the_original_bag_test() {
 }
 
 pub fn merge_is_commutative_test() {
-  use #(bag1, bag2) <- fuzz(random.map2(bag(), bag(), pair.new))
+  use #(bag1, bag2) <- fuzz({
+    use bag1 <- random.then(bag())
+    use bag2 <- random.then(bag())
+    random.constant(#(bag1, bag2))
+  })
   bag.merge(bag1, bag2)
   |> should.equal(bag.merge(bag2, bag1))
 }
@@ -180,7 +189,11 @@ pub fn merge_is_associative_test() {
 }
 
 pub fn merge_sums_the_occurrences_test() {
-  use #(bag1, bag2) <- fuzz(random.map2(bag(), bag(), pair.new))
+  use #(bag1, bag2) <- fuzz({
+    use bag1 <- random.then(bag())
+    use bag2 <- random.then(bag())
+    random.constant(#(bag1, bag2))
+  })
   let union = bag.merge(bag1, bag2)
 
   use #(item, copies_in_union) <- list.each(bag.to_list(union))
@@ -204,7 +217,11 @@ pub fn anything_minus_empty_is_still_empty_test() {
 }
 
 pub fn subtraction_removes_the_appropriate_number_of_occurrences_test() {
-  use #(bag1, bag2) <- fuzz(random.map2(bag(), bag(), pair.new))
+  use #(bag1, bag2) <- fuzz({
+    use bag1 <- random.then(bag())
+    use bag2 <- random.then(bag())
+    random.constant(#(bag1, bag2))
+  })
   let difference = bag.subtract(from: bag1, items_of: bag2)
 
   use #(item, copies_in_difference) <- list.each(bag.to_list(difference))
@@ -277,9 +294,23 @@ const iterations = 100
 const max_list_size = 100
 
 fn fuzz(for_each generator: Generator(a), check assertion: fn(a) -> Nil) -> Nil {
-  random.to_iterator(generator, seed.new(11))
-  |> iterator.take(iterations)
-  |> iterator.each(assertion)
+  fuzz_loop(iterations, random.new_seed(11), generator, assertion)
+}
+
+fn fuzz_loop(
+  left: Int,
+  seed: random.Seed,
+  generator: Generator(a),
+  assertion: fn(a) -> Nil,
+) -> Nil {
+  case left <= 0 {
+    True -> Nil
+    False -> {
+      let #(value, seed) = random.step(generator, seed)
+      assertion(value)
+      fuzz_loop(left - 1, seed, generator, assertion)
+    }
+  }
 }
 
 fn letter() -> Generator(String) {
@@ -296,7 +327,9 @@ fn bag() -> Generator(Bag(String)) {
 }
 
 fn bag_and_letter() -> Generator(#(Bag(String), String)) {
-  random.map2(bag(), letter(), pair.new)
+  use bag <- random.then(bag())
+  use letter <- random.then(letter())
+  random.constant(#(bag, letter))
 }
 
 fn bag_letter_and_copies() -> Generator(#(Bag(String), String, Int)) {
@@ -304,7 +337,11 @@ fn bag_letter_and_copies() -> Generator(#(Bag(String), String, Int)) {
 }
 
 fn letters_map() -> Generator(Dict(String, Int)) {
-  let letter_with_copies = random.map2(letter(), positive_int(), pair.new)
+  let letter_with_copies = {
+    use letter <- random.then(letter())
+    use int <- random.then(positive_int())
+    random.constant(#(letter, int))
+  }
 
   random.int(0, max_list_size)
   |> random.then(fn(size) {
@@ -322,5 +359,8 @@ fn triple(
   gen2: Generator(b),
   gen3: Generator(c),
 ) -> Generator(#(a, b, c)) {
-  random.map3(gen1, gen2, gen3, fn(a, b, c) { #(a, b, c) })
+  use a <- random.then(gen1)
+  use b <- random.then(gen2)
+  use c <- random.then(gen3)
+  random.constant(#(a, b, c))
 }
